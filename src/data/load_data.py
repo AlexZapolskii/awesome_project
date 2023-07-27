@@ -27,13 +27,10 @@ def load_transform_dataset(path):
 
     df["digital_2020_2022Q1_imp"] = df[digital_list].sum(axis=1)
     df["digital_2020_2022Q1_imp"] = df[df.index <= '2022-04-01']['digital_2020_2022Q1_imp']
-
     df["digital_2020_2022Q1_spend"] = df[digital_spend_list].sum(axis=1)
     df["digital_2020_2022Q1_spend"] = df[df.index <= '2022-04-01']['digital_2020_2022Q1_spend']
-
     df["digital_none_youtube_imp"] = df[digital_list].sum(axis=1)
     df["digital_none_youtube_imp"] = df[df.index > '2022-04-01']['digital_none_youtube_imp']
-
     df["digital_none_youtube_spend"] = df[digital_spend_list].sum(axis=1)
     df["digital_none_youtube_spend"] = df[df.index > '2022-04-01']['digital_none_youtube_spend']
 
