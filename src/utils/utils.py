@@ -1,3 +1,8 @@
+"""
+Реализация основных классов и функций
+"""
+
+
 # class carryover (cumulative effect of advertising)
 class Carryover(BaseEstimator, TransformerMixin):
     def __init__(self, strength=0.9, length=3):
@@ -7,7 +12,9 @@ class Carryover(BaseEstimator, TransformerMixin):
     def fit(self, X, y=None):
         X = check_array(X)
         self._check_n_features(X, reset=True)
-        self.sliding_window_ = (self.strength ** np.arange(self.length + 1)).reshape(-1, 1)
+        self.sliding_window_ = (self.strength ** np.arange(self.length + 1)).reshape(
+            -1, 1
+        )
         return self
 
     def transform(self, X: np.ndarray):
@@ -34,7 +41,9 @@ class Saturation(BaseEstimator, TransformerMixin):
         check_is_fitted(self)
         X = check_array(X)
         self._check_n_features(X, reset=False)  # from BaseEstimator
-        return (1 / (1 + np.exp(-self.alpha * (X - self.x0)))) - (1 / (1 + np.exp(-self.alpha * (0 - self.x0))))
+        return (1 / (1 + np.exp(-self.alpha * (X - self.x0)))) - (
+            1 / (1 + np.exp(-self.alpha * (0 - self.x0)))
+        )
 
 
 def formula(var_list):
@@ -51,4 +60,3 @@ def smoothing(series, alpha):
     for n in range(1, len(series)):
         result.append(alpha * series[n] + (1 - alpha) * result[n - 1])
     return result
-
