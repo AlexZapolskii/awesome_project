@@ -1,6 +1,7 @@
 import pandas as pd
 from sklearn.metrics import mean_absolute_percentage_error
 import itertools
+import numpy as np
 import matplotlib.pyplot as plt
 import warnings
 warnings.filterwarnings("ignore")
@@ -15,6 +16,10 @@ def optimize(df_source: pd.DataFrame):
     Прогоняет регрессию с заданынми параметрами
     оптимизации
     """
+
+    # TODO: параметризация
+    #       subnumbers
+    #       по
 
     subnumbers = 5
     a_x = np.linspace(20, 50, 4)
@@ -50,7 +55,7 @@ def optimize(df_source: pd.DataFrame):
         "dish_qnt_reg_negative",
         "average_price_dish_region_smooth_5",
         "price_lag_new_smooth_40",
-        "dummy_apr",
+        "dummy_apr"
     ]
 
     paid_vars_imp = [
@@ -65,10 +70,18 @@ def optimize(df_source: pd.DataFrame):
         "nat_tv_wo2020_product_imp_sov",
         "nat_tv_wo2020_vfm_imp_sov",
         "final_ap",
-        "digital_none_youtube_imp",
+        "digital_none_youtube_imp"
     ]
 
+    for i in paid_vars_imp:
+        if np.sum(df_source[i]) == 0:
+            print(i)
+            df_source = df_source.drop(i, axis=1)
+            paid_vars_imp.remove(i)
+
     for var in paid_vars_imp:
+
+        print(f'Current_var {var}')
         ans = pd.DataFrame(
             [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
             columns=[
@@ -414,10 +427,7 @@ def optimize(df_source: pd.DataFrame):
         ans["percentile_y_1"] = ans["percentiles"].apply(lambda x: np.round(x[0], 5))
         ans["percentile_y_2"] = ans["percentiles"].apply(lambda x: np.round(x[1], 5))
 
-        import os
-        print(os.getcwd())
         #ans.to_excel(f'{f"/data/interim/{var}_trans"}_res.xlsx', index=False)
-        ans.to_excel(f'{f"data/interim/{var}_trans"}_res.xlsx', index=False)
-        #/ Users / alexeyzapolskii / PycharmProjects / awesome_project
-        break
+        ans.to_excel(f'{f"data/processed/{var}_trans"}_res.xlsx', index=False)
+
 

@@ -33,9 +33,11 @@ def load_transform_dataset(path, current_region):
     df["digital_none_youtube_spend"] = df[digital_spend_list].sum(axis=1)
     df["digital_none_youtube_spend"] = df[df.index > '2022-04-01']['digital_none_youtube_spend']
 
+
     df = df.fillna(0)
 
     df['avg_check'] = 1
     df["competitors_list_tv"] = df[competitors_list_tv].sum(axis=1)
+
 
     return df
