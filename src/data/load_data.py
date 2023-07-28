@@ -2,12 +2,11 @@ import pandas as pd
 from statsmodels.tsa.seasonal import seasonal_decompose
 from utils.utils import *
 from utils.enums import *
-def load_transform_dataset(path):
+def load_transform_dataset(path, current_region):
     """
     Загружает исходные данные и
     приводит в нужный формат
         """
-    path = file
     df = pd.read_csv(path).fillna(0)
     df['date'] = pd.to_datetime(df['date'])
     df['mc_leave'] = np.where(df['date'] >= '2022-03-14', 1, 0)

@@ -1,50 +1,72 @@
-from src.utils.enums import paid_vars_imp
-import numpy as np
-from matplotlib import pyplot as plt
 import pandas as pd
-import statsmodels.formula.api as sm
-
-pallete = plt.get_cmap("Set2")
+from sklearn.metrics import mean_absolute_percentage_error
+import itertools
+import matplotlib.pyplot as plt
 import warnings
-
 warnings.filterwarnings("ignore")
 from utils.utils import *
 from utils.enums import *
-from sklearn.metrics import mean_absolute_percentage_error
-from tqdm.notebook import tqdm
-import itertools
 
-subnumbers = 5
-a_x = np.linspace(20, 50, 4)
-b_x = np.linspace(70, 99, 4)
 
-percentiles_border_combs = []  # x
-
-for r in itertools.product(a_x, b_x):
-    if np.all(np.diff(r) >= 48):
-        percentiles_border_combs.append(r)
-
-a_y = np.linspace(0.01, 0.51, 4)
-b_y = np.linspace(0.49, 0.99, 4)
-
-combs = []  # y
-for r in itertools.product(a_y, b_y):
-    if (
-        np.all(np.diff(r) <= 0.9)
-        and np.all(np.diff(r) > 0)
-        and np.all(np.diff(r) >= 0.45)
-    ):
-        combs.append(r)
-
-strength = np.linspace(0, 0.8, subnumbers)
-length = [2, 4, 6, 8, 10, 12]
-
+pallete = plt.get_cmap("Set2")
 
 def optimize(df_source: pd.DataFrame):
     """
     Прогоняет регрессию с заданынми параметрами
     оптимизации
     """
+
+    subnumbers = 5
+    a_x = np.linspace(20, 50, 4)
+    b_x = np.linspace(70, 99, 4)
+
+    percentiles_border_combs = []  # x
+
+    for r in itertools.product(a_x, b_x):
+        if np.all(np.diff(r) >= 48):
+            percentiles_border_combs.append(r)
+
+    a_y = np.linspace(0.01, 0.51, 4)
+    b_y = np.linspace(0.49, 0.99, 4)
+
+    combs = []  # y
+    for r in itertools.product(a_y, b_y):
+        if (
+                np.all(np.diff(r) <= 0.9)
+                and np.all(np.diff(r) > 0)
+                and np.all(np.diff(r) >= 0.45)
+        ):
+            combs.append(r)
+
+    strength = np.linspace(0, 0.8, subnumbers)
+    length = [2, 4, 6, 8, 10, 12]
+
+    context_vars = [
+        "stores",
+        "seasonality",
+        "competitors_list_tv",
+        "new_covid",
+        "sales_qsr",
+        "dish_qnt_reg_negative",
+        "average_price_dish_region_smooth_5",
+        "price_lag_new_smooth_40",
+        "dummy_apr",
+    ]
+
+    paid_vars_imp = [
+        "gis_imp",
+        "final_ooh",
+        "final_tm",
+        "reg_tv_imp",
+        "full_yandex_maps_imp",
+        "OOH_imp",
+        "final_posm",
+        "digital_2020_2022Q1_imp",
+        "nat_tv_wo2020_product_imp_sov",
+        "nat_tv_wo2020_vfm_imp_sov",
+        "final_ap",
+        "digital_none_youtube_imp",
+    ]
 
     for var in paid_vars_imp:
         ans = pd.DataFrame(
@@ -69,9 +91,9 @@ def optimize(df_source: pd.DataFrame):
             ],
         )
 
-        for s in tqdm(strength):
-            for l in tqdm(length):
-                for i in tqdm(combs):
+        for s in (strength):
+            for l in (length):
+                for i in (combs):
                     for percentiles_border in percentiles_border_combs:
                         df = df_source.copy()
                         df["competitors_list_tv"] = (
@@ -391,4 +413,11 @@ def optimize(df_source: pd.DataFrame):
         ans["alpha"] = ans["model"].apply(lambda x: x.split("_")[1:][3])
         ans["percentile_y_1"] = ans["percentiles"].apply(lambda x: np.round(x[0], 5))
         ans["percentile_y_2"] = ans["percentiles"].apply(lambda x: np.round(x[1], 5))
-        ans.to_excel(f'{f"../data/interim/{var}_trans"}_res.xlsx', index=False)
+
+        import os
+        print(os.getcwd())
+        #ans.to_excel(f'{f"/data/interim/{var}_trans"}_res.xlsx', index=False)
+        ans.to_excel(f'{f"data/interim/{var}_trans"}_res.xlsx', index=False)
+        #/ Users / alexeyzapolskii / PycharmProjects / awesome_project
+        break
+

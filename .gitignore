@@ -2,6 +2,10 @@
 __pycache__/
 *.py[cod]
 
+src/cycle_refactoring.py
+src/first_notebook.py
+src/utils/under_cycle.py
+
 # C extensions
 *.so
 

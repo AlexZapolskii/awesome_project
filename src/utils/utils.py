@@ -1,7 +1,12 @@
 """
 Реализация основных классов и функций
 """
-
+import numpy as np
+import pandas as pd
+from sklearn.utils.validation import check_is_fitted, check_array
+from sklearn.base import BaseEstimator, TransformerMixin
+from scipy.signal import convolve2d
+import statsmodels.formula.api as sm
 
 # class carryover (cumulative effect of advertising)
 class Carryover(BaseEstimator, TransformerMixin):
