@@ -428,6 +428,4 @@ def optimize(df_source: pd.DataFrame):
         ans["percentile_y_2"] = ans["percentiles"].apply(lambda x: np.round(x[1], 5))
 
         #ans.to_excel(f'{f"/data/interim/{var}_trans"}_res.xlsx', index=False)
-        ans.to_excel(f'{f"data/processed/{var}_trans"}_res.xlsx', index=False)
-
-
+        ans.to_excel(f'{f"data/interim/{var}_trans"}_res.xlsx', index=False)

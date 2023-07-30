@@ -10,6 +10,7 @@ import warnings
 warnings.filterwarnings('ignore')
 from data.load_data import load_transform_dataset
 from models.optimizer import optimize
+from utils.utils import Step2
 
 
 if __name__ == '__main__':
@@ -20,3 +21,5 @@ if __name__ == '__main__':
 
     optimize(df) # запускает оптимизатор и сохраняет результаты в папку interim
 
+    # Шаг 2 - расчет ROI
+    Step2(current_region, df).process_files().fit().ROI()
