@@ -189,7 +189,7 @@ class Step2:
 
             elif var == 'nat_tv_wo2020_imp_sov':
                 roi = {var: np.sum(df[f"{var}_trans"] * coef[f"{var}_trans"].values) * np.mean(df['avg_check']) \
-                            / np.sum(df['nat_tv_spend_2021_2022'])
+                            / np.sum(df['nat_tv_product_spend'])
                        }
                 ROI = ROI.append(pd.DataFrame.from_dict(roi, orient='index').reset_index().fillna(0))
 

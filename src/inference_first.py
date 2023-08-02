@@ -14,12 +14,24 @@ from utils.utils import Step2
 
 
 if __name__ == '__main__':
+    # file = "data/raw/total_df.xlsx"
+    # df = pd.read_excel(file).fillna(0)
+    # df.to_csv('data/raw/total_df.csv', index=False)
+
     PATH = "data/raw/total_df.csv"
     current_region = 'юг'
 
-    df = load_transform_dataset(PATH, current_region)
+    df, paid_vars_imp = load_transform_dataset(PATH, current_region)
 
-    optimize(df) # запускает оптимизатор и сохраняет результаты в папку interim
+    # optimize(df, paid_vars_imp) # запускает оптимизатор и сохраняет результаты в папку interim
 
     # Шаг 2 - расчет ROI
-    Step2(current_region, df).process_files().fit().ROI()
+    # Step2(current_region, df).process_files().fit().ROI()
+
+    # Шаг 3
+
+    matrix = pd.read_excel('data/processed/matrix_params.xlsx').iloc[:, 1:]
+    print(matrix.shape)
+
+
+

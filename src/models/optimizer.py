@@ -7,11 +7,13 @@ import warnings
 warnings.filterwarnings("ignore")
 from utils.utils import *
 from utils.enums import *
+from utils.enums import context_vars
+
 
 
 pallete = plt.get_cmap("Set2")
 
-def optimize(df_source: pd.DataFrame):
+def optimize(df_source: pd.DataFrame, paid_vars_imp):
     """
     Прогоняет регрессию с заданынми параметрами
     оптимизации
@@ -46,38 +48,11 @@ def optimize(df_source: pd.DataFrame):
     strength = np.linspace(0, 0.8, subnumbers)
     length = [2, 4, 6, 8, 10, 12]
 
-    context_vars = [
-        "stores",
-        "seasonality",
-        "competitors_list_tv",
-        "new_covid",
-        "sales_qsr",
-        "dish_qnt_reg_negative",
-        "average_price_dish_region_smooth_5",
-        "price_lag_new_smooth_40",
-        "dummy_apr"
-    ]
-
-    paid_vars_imp = [
-        "gis_imp",
-        "final_ooh",
-        "final_tm",
-        "reg_tv_imp",
-        "full_yandex_maps_imp",
-        "OOH_imp",
-        "final_posm",
-        "digital_2020_2022Q1_imp",
-        "nat_tv_wo2020_product_imp_sov",
-        "nat_tv_wo2020_vfm_imp_sov",
-        "final_ap",
-        "digital_none_youtube_imp"
-    ]
-
-    for i in paid_vars_imp:
-        if np.sum(df_source[i]) == 0:
-            print(i)
-            df_source = df_source.drop(i, axis=1)
-            paid_vars_imp.remove(i)
+    context_vars = ['stores', 'seasonality', 'competitors_list_tv', 'new_covid',
+                    'sales_qsr',
+                    'dish_qnt_reg_negative',
+                    'average_price_dish_region_smooth_5', 'price_lag_new_smooth_40',
+                    'dummy_apr']
 
     for var in paid_vars_imp:
 
