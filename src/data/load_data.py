@@ -7,7 +7,6 @@ from utils import enums
 from utils.enums import competitors_list_tv, competitors_list_w_o_tv, digital_list, digital_spend_list
 
 
-
 def load_transform_dataset(path, current_region):
     """
     Загружает исходные данные и

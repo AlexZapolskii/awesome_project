@@ -200,6 +200,18 @@ class Step2:
                        }
                 ROI = ROI.append(pd.DataFrame.from_dict(roi, orient='index').reset_index().fillna(0))
 
+            elif var == 'nat_tv_wo2020_product_imp_sov':
+                roi = {var: np.sum(df[f"{var}_trans"] * coef[f"{var}_trans"].values) * np.mean(df['avg_check']) \
+                            / np.sum(df['nat_tv_product_spend'])
+                       }
+                ROI = ROI.append(pd.DataFrame.from_dict(roi, orient='index').reset_index().fillna(0))
+
+
+            elif var == 'nat_tv_wo2020_vfm_imp_sov':
+                roi = {var: np.sum(df[f"{var}_trans"] * coef[f"{var}_trans"].values) * np.mean(df['avg_check']) \
+                            / np.sum(df['nat_tv_vfm_spend'])
+                       }
+                ROI = ROI.append(pd.DataFrame.from_dict(roi, orient='index').reset_index().fillna(0))
 
             elif var == 'digital_none_youtube_imp':
                 roi = {var: np.sum(df[f"{var}_trans"] * coef[f"{var}_trans"].values) * np.mean(df['avg_check']) \
@@ -235,3 +247,279 @@ def smoothing(series, alpha):
     for n in range(1, len(series)):
         result.append(alpha * series[n] + (1 - alpha) * result[n - 1])
     return result
+
+
+class Step4:
+    def __init__(self, df):
+        self.df = df.fillna(0)
+        p_levels = [0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
+        #self.df['date'] = pd.to_datetime(self.df['date'])
+        #self.df = self.df.set_index('date')
+        self.df['year'] = self.df.index.year
+        self.df['quarter'] = self.df.index.quarter
+
+        # TODO: убрать хардкод!
+
+        last_roi = pd.read_excel('data/interim/step3/roi_1.xlsx')  # откуда берем roi?
+
+        for file in [i for i in os.listdir('data/interim/step3/') if '0' in i and 'iteration' in i]:
+            for p_level in p_levels:
+                if file.split('_iteration_0_trans_step_3_res.xlsx')[0] in last_roi['chanel'].values:
+                    df = pd.read_excel('data/interim/step3/' + file)
+
+                    df.replace([np.inf, -np.inf], np.nan, inplace=True)
+                    df.dropna(inplace=True)
+                    df = df[df['coef'] > 0]
+                    df = df[df['ban_roi'] == 0]
+                    df = df[df['p_value'] <= p_level]
+                    df = df[df['ban_adstock'] == 0]
+
+                    if len(df) > 0:
+                        df['weight'] = df['final_metric'] / df['final_metric'].sum()
+                        df.to_excel('data/interim/step3/' + file, index=False)
+                        break
+                else:
+                    continue
+
+        return None
+
+    def process_files(self):
+
+        df = self.df
+        # df['date'] = pd.to_datetime(df['date'])
+        # df = df.set_index('date')
+        #df['year'] = df.index.year
+        #df['quarter'] = df.index.quarter
+
+        data = df.copy()
+
+        latest_weights = pd.read_excel('data/interim/step3/' + "coefs_1.xlsx")
+
+        last_roi = pd.read_excel('data/interim/step3/' + 'roi_1.xlsx')
+
+        dates_list = sorted(list(map(lambda x: (x[0], [x[1]]), set([(year, quarter) \
+                                                                    for year, quarter in
+                                                                    zip(data['year'], data['quarter'])]))), \
+                            key=lambda x: (x[0], x[1]))
+
+        for file in [i for i in os.listdir('data/interim/step3/') if '1' in i and 'iteration' in i]:
+
+            model_df = pd.read_excel('data/interim/step3/' + file)
+
+            if file.split('_iteration_1_trans_step_3_res.xlsx')[0] in last_roi['chanel'].values:
+
+                if 'weight' in model_df.columns:
+
+                    model_df.replace([np.inf, -np.inf], np.nan, inplace=True)
+
+                    model_df = model_df.reset_index().drop('index', axis=1)
+
+                    groups = [
+                                 (2020, range(1, 5)),
+                                 (2021, range(1, 5)),
+                                 (2022, range(1, 5))] + dates_list
+
+                    current_var = file.split('iteration')[0][:-1]
+
+                    for index, row in tqdm(model_df.iterrows()):
+
+                        cumulative_df = pd.DataFrame(columns=df.columns)
+
+                        for group in groups:
+
+                            df = data.copy()
+
+                            df = df.fillna(0)
+
+                            df[f"{current_var}_c"] = Carryover(strength=row['strength'], length=int(row['length'])).fit(
+                                np.array(df[current_var]).reshape(-1, 1)).transform(
+                                np.array(df[current_var]).reshape(-1, 1))
+
+                            df[f"{current_var}_trans"] = Saturation(x0=row['x0'], alpha=row['alpha']).fit(
+                                np.array(df[f"{current_var}_c"]).reshape(-1, 1)).transform(
+                                np.array(df[f"{current_var}_c"]).reshape(-1, 1))
+
+                            temp_df = df[(df['year'] == group[0]) & (df['quarter'].isin(group[1]))]
+
+                            # display(temp_df.index[0])
+
+                            if current_var == 'gis_imp':
+
+                                roi = {current_var: np.sum(temp_df[f"{current_var}_trans"] * row['coef']) * np.mean(
+                                    temp_df['avg_check']) \
+                                                    / np.sum(temp_df['gis_spend'])
+                                       }
+
+                                impact = {current_var: np.sum(temp_df[f"{current_var}_trans"] * row['coef'])
+
+                                          }
+
+                            elif current_var == 'reg_tv_imp':
+                                roi = {current_var: np.sum(temp_df[f"{current_var}_trans"] * row['coef']) * np.mean(
+                                    temp_df['avg_check']) \
+                                                    / np.sum(temp_df['reg_tv_spend'])
+                                       }
+
+                                impact = {current_var: np.sum(temp_df[f"{current_var}_trans"] * row['coef'])
+
+                                          }
+
+                            elif current_var == 'OOH_imp':
+                                roi = {current_var: np.sum(temp_df[f"{current_var}_trans"] * row['coef']) * np.mean(
+                                    temp_df['avg_check']) \
+                                                    / np.sum(temp_df['OOH_spend'])
+                                       }
+
+                                impact = {current_var: np.sum(temp_df[f"{current_var}_trans"] * row['coef'])
+
+                                          }
+
+                            elif current_var == 'full_yandex_maps_imp':
+                                roi = {current_var: np.sum(temp_df[f"{current_var}_trans"] * row['coef']) * np.mean(
+                                    temp_df['avg_check']) \
+                                                    / np.sum(temp_df['full_yandex_maps_spend'])
+                                       }
+
+                                impact = {current_var: np.sum(temp_df[f"{current_var}_trans"] * row['coef'])
+
+                                          }
+
+                            elif current_var == 'nat_tv_wo2020_angus_imp_norm_sov':
+                                roi = {current_var: np.sum(temp_df[f"{current_var}_trans"] * row['coef']) * np.mean(
+                                    temp_df['avg_check']) \
+                                                    / np.sum(temp_df['nat_tv_angus_spend'])
+                                       }
+
+                                impact = {current_var: np.sum(temp_df[f"{current_var}_trans"] * row['coef'])
+
+                                          }
+
+                            elif current_var == 'nat_tv_wo2020_product_imp_sov':
+                                roi = {current_var: np.sum(temp_df[f"{current_var}_trans"] * row['coef']) * np.mean(
+                                    temp_df['avg_check']) \
+                                                    / np.sum(temp_df['nat_tv_product_spend'])
+                                       }
+
+                                impact = {current_var: np.sum(temp_df[f"{current_var}_trans"] * row['coef'])
+
+                                          }
+
+                            elif current_var == 'nat_tv_wo2020_vfm_imp_sov':
+                                roi = {current_var: np.sum(temp_df[f"{current_var}_trans"] * row['coef']) * np.mean(
+                                    temp_df['avg_check']) \
+                                                    / np.sum(temp_df['nat_tv_vfm_spend'])
+                                       }
+
+                                impact = {current_var: np.sum(temp_df[f"{current_var}_trans"] * row['coef'])
+
+                                          }
+
+                            elif current_var == 'digital_none_youtube_imp':
+                                roi = {current_var: np.sum(temp_df[f"{current_var}_trans"] * row['coef']) * np.mean(
+                                    temp_df['avg_check']) \
+                                                    / np.sum(temp_df['digital_none_youtube_spend'])
+                                       }
+
+                                impact = {current_var: np.sum(temp_df[f"{current_var}_trans"] * row['coef'])
+
+                                          }
+
+                            elif current_var == 'digital_2020_2022Q1_imp':
+                                roi = {current_var: np.sum(temp_df[f"{current_var}_trans"] * row['coef']) * np.mean(
+                                    temp_df['avg_check']) \
+                                                    / np.sum(temp_df['digital_2020_2022Q1_spend'])
+                                       }
+
+                                impact = {current_var: np.sum(temp_df[f"{current_var}_trans"] * row['coef'])
+
+                                          }
+
+                            elif current_var == 'digital_imp_youtube':
+                                roi = {current_var: np.sum(temp_df[f"{current_var}_trans"] * row['coef']) * np.mean(
+                                    temp_df['avg_check']) \
+                                                    / np.sum(temp_df['digital_spend_youtube'])
+                                       }
+
+                                impact = {current_var: np.sum(temp_df[f"{current_var}_trans"] * row['coef'])
+
+                                          }
+
+                            else:
+                                roi = {current_var: np.sum(temp_df[f"{current_var}_trans"] * row['coef']) * np.mean(
+                                    temp_df['avg_check']) \
+                                                    / np.sum(temp_df[current_var])
+                                       }
+                                impact = {current_var: np.sum(temp_df[f"{current_var}_trans"] * row['coef'])
+
+                                          }
+
+                            roi = pd.DataFrame.from_dict(roi, orient='index').reset_index().fillna(0)
+
+                            impact = pd.DataFrame.from_dict(impact, orient='index').reset_index().fillna(0)
+
+                            if group[0] == 2020 and isinstance(group[1], range):
+
+                                roi.columns = ['chanel', 'roi_2020']
+                                model_df.loc[index, 'roi_2020'] = roi['roi_2020'].values[0]
+                                impact.columns = ['chanel', 'impact_2020']
+                                model_df.loc[index, 'impact_2020'] = impact['impact_2020'].values[0]
+
+                            elif group[0] == 2021 and isinstance(group[1], range):
+
+                                roi.columns = ['chanel', 'roi_2021']
+                                model_df.loc[index, 'roi_2021'] = roi['roi_2021'].values[0]
+                                impact.columns = ['chanel', 'impact_2021']
+                                model_df.loc[index, 'impact_2021'] = impact['impact_2021'].values[0]
+
+                            elif group[0] == 2022 and isinstance(group[1], range):
+
+                                roi.columns = ['chanel', 'roi_2022']
+                                model_df.loc[index, 'roi_2022'] = roi['roi_2022'].values[0]
+                                impact.columns = ['chanel', 'impact_2022']
+                                model_df.loc[index, 'impact_2022'] = impact['impact_2022'].values[0]
+
+                            else:
+
+                                roi.columns = ['chanel', f'roi_{str(group[0])}_Q{str(group[1][0])}']
+
+                                model_df.loc[index, f'roi_{str(group[0])}_Q{str(group[1][0])}'] \
+                                    = roi[f'roi_{str(group[0])}_Q{str(group[1][0])}'].values[0]
+
+                                impact.columns = ['chanel', 'impact_' + f'roi_{str(group[0])}_Q{str(group[1][0])}']
+
+                                model_df.loc[index, 'impact_' + f'roi_{str(group[0])}_Q{str(group[1][0])}'] = \
+                                impact['impact_' + f'roi_{str(group[0])}_Q{str(group[1][0])}'].values[0]
+
+                        del temp_df
+
+                    model_df['weighted_strength'] = np.round(np.sum(model_df['weight'] * model_df['strength']), 2)
+
+                    model_df['weighted_length'] = int(np.round(np.sum(model_df['weight'] * model_df['length'])))
+
+                    model_df['weighted_roi_2020'] = np.round(np.sum(model_df['weight'] * model_df['roi_2020']), 2)
+
+                    model_df['weighted_roi_2021'] = np.round(np.sum(model_df['weight'] * model_df['roi_2021']), 2)
+
+                    model_df['weighted_roi_2022'] = np.round(np.sum(model_df['weight'] * model_df['roi_2022']), 2)
+
+                    model_df['weighted_' + f'roi_{str(group[0])}_Q + {str(group[1][0])}'] = np.round(
+                        np.sum(model_df['weight'] * \
+                               model_df[f'roi_{str(group[0])}_Q{str(group[1][0])}']), 2)
+
+                    model_df['weighted_impact_2020'] = np.round(np.sum(model_df['weight'] * model_df['impact_2020']), 2)
+
+                    model_df['weighted_impact_2021'] = np.round(np.sum(model_df['weight'] * model_df['impact_2021']), 2)
+
+                    model_df['weighted_impact_2022'] = np.round(np.sum(model_df['weight'] * model_df['impact_2022']), 2)
+
+                    model_df['weighted_impact_' + f'roi_{str(group[0])}_Q + {str(group[1][0])}'] = np.round(
+                        np.sum(model_df['weight'] * \
+                               model_df['impact_' + f'roi_{str(group[0])}_Q{str(group[1][0])}']), 2)
+
+                    model_df.to_excel('data/interim/step3/'+current_var + '_w_ROI_w_Impact_all' + '.xlsx', index=False)
+
+            else:
+
+                continue
+
+        return self

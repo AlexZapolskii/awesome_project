@@ -10,28 +10,27 @@ import warnings
 warnings.filterwarnings('ignore')
 from data.load_data import load_transform_dataset
 from models.optimizer import optimize
-from utils.utils import Step2
-
+from utils.utils import Step2, Step4
+from models.step3_draft import optimize_step3
 
 if __name__ == '__main__':
-    # file = "data/raw/total_df.xlsx"
-    # df = pd.read_excel(file).fillna(0)
-    # df.to_csv('data/raw/total_df.csv', index=False)
+    file = "data/raw/total_df.xlsx"
+    df = pd.read_excel(file).fillna(0)
+    df.to_csv('data/raw/total_df.csv', index=False)
 
     PATH = "data/raw/total_df.csv"
     current_region = 'юг'
 
     df, paid_vars_imp = load_transform_dataset(PATH, current_region)
 
-    # optimize(df, paid_vars_imp) # запускает оптимизатор и сохраняет результаты в папку interim
+    optimize(df, paid_vars_imp) # запускает оптимизатор и сохраняет результаты в папку interim
 
     # Шаг 2 - расчет ROI
-    # Step2(current_region, df).process_files().fit().ROI()
+    Step2(current_region, df).process_files().fit().ROI()
 
-    # Шаг 3
+    # Шаг 3 - в работе!
 
-    matrix = pd.read_excel('data/processed/matrix_params.xlsx').iloc[:, 1:]
-    print(matrix.shape)
+    optimize_step3(df, paid_vars_imp) # запускает оптимизатор и сохраняет результаты в папку interim
 
-
-
+    # Шаг 4
+    Step4(df).process_files()
