@@ -23,14 +23,17 @@ if __name__ == '__main__':
 
     df, paid_vars_imp = load_transform_dataset(PATH, current_region)
 
-    optimize(df, paid_vars_imp) # запускает оптимизатор и сохраняет результаты в папку interim
+    # df.to_csv('data/raw/final_df.csv')
+
+    # optimize(df, paid_vars_imp) # запускает оптимизатор и сохраняет результаты в папку interim
 
     # Шаг 2 - расчет ROI
-    Step2(current_region, df).process_files().fit().ROI()
+    # Step2(current_region, df).process_files().fit().ROI()
 
-    # Шаг 3 - в работе!
+    # Шаг 3
 
-    optimize_step3(df, paid_vars_imp) # запускает оптимизатор и сохраняет результаты в папку interim
+    # optimize_step3(df, paid_vars_imp) # запускает оптимизатор и сохраняет результаты в папку interim
 
+    print('Step 4 start')
     # Шаг 4
-    Step4(df).process_files()
+    Step4(df).process_files(df)

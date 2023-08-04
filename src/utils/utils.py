@@ -260,7 +260,7 @@ class Step4:
 
         # TODO: убрать хардкод!
 
-        last_roi = pd.read_excel('data/interim/step3/roi_1.xlsx')  # откуда берем roi?
+        last_roi = pd.read_excel('data/interim/step3/roi_11.xlsx')  # откуда берем roi?
 
         for file in [i for i in os.listdir('data/interim/step3/') if '0' in i and 'iteration' in i]:
             for p_level in p_levels:
@@ -283,30 +283,30 @@ class Step4:
 
         return None
 
-    def process_files(self):
+    def process_files(self, df2):
 
-        df = self.df
-        # df['date'] = pd.to_datetime(df['date'])
-        # df = df.set_index('date')
-        #df['year'] = df.index.year
-        #df['quarter'] = df.index.quarter
+        df = df2.fillna(0)
+
+        df['year'] = df.index.year
+        df['quarter'] = df.index.quarter
 
         data = df.copy()
 
-        latest_weights = pd.read_excel('data/interim/step3/' + "coefs_1.xlsx")
+        latest_weights = pd.read_excel('data/interim/step3/' + "coefs_11.xlsx")
 
-        last_roi = pd.read_excel('data/interim/step3/' + 'roi_1.xlsx')
+        last_roi = pd.read_excel('data/interim/step3/' + 'roi_11.xlsx')
 
         dates_list = sorted(list(map(lambda x: (x[0], [x[1]]), set([(year, quarter) \
                                                                     for year, quarter in
                                                                     zip(data['year'], data['quarter'])]))), \
                             key=lambda x: (x[0], x[1]))
 
-        for file in [i for i in os.listdir('data/interim/step3/') if '1' in i and 'iteration' in i]:
+
+        for file in [i for i in os.listdir('data/interim/step3/') if '11' in i and 'iteration' in i]:
 
             model_df = pd.read_excel('data/interim/step3/' + file)
 
-            if file.split('_iteration_1_trans_step_3_res.xlsx')[0] in last_roi['chanel'].values:
+            if file.split('_iteration_11_trans_step_3_res.xlsx')[0] in last_roi['chanel'].values:
 
                 if 'weight' in model_df.columns:
 
@@ -321,7 +321,7 @@ class Step4:
 
                     current_var = file.split('iteration')[0][:-1]
 
-                    for index, row in tqdm(model_df.iterrows()):
+                    for index, row in (model_df.iterrows()):
 
                         cumulative_df = pd.DataFrame(columns=df.columns)
 
