@@ -82,11 +82,11 @@ def optimize_step3(df_source: pd.DataFrame, paid_vars_imp):
 
                             df["competitors_list_w_o_tv"] = df[competitors_list_w_o_tv].sum(axis=1)
 
-                            context_vars = ['stores', 'seasonality', 'competitors_list_tv', 'new_covid',
-                                            'sales_qsr',
-                                            'dish_qnt_reg_negative',
+                            context_vars = ['stores', 'seasonality', 'competitors_list_tv', 'new_covid', 'lockdown',
+                                            'sales_qsr', 'test_mac_off', 'covid_dummy', 'back_to_school', 'big_hit',
+                                            'McD_leave', 'ViT_2', 'dish_qnt_reg_negative',
                                             'average_price_dish_region_smooth_5', 'price_lag_new_smooth_40',
-                                            'dummy_apr']
+                                            'dummy_apr', 'comps_SOM']
 
                             df[f"{var}_c"] = Carryover(strength=s, length=l).fit(
                                 np.array(df[var]).reshape(-1, 1)).transform(np.array(df[var]).reshape(-1, 1))
@@ -400,11 +400,11 @@ def optimize_step3(df_source: pd.DataFrame, paid_vars_imp):
 
         df["competitors_list_w_o_tv"] = df[competitors_list_w_o_tv].sum(axis=1)
 
-        context_vars = ['stores', 'seasonality', 'competitors_list_tv', 'new_covid',
-                        'sales_qsr',
-                        'dish_qnt_reg_negative',
+        context_vars = ['stores', 'seasonality', 'competitors_list_tv', 'new_covid', 'lockdown',
+                        'sales_qsr', 'test_mac_off', 'covid_dummy', 'back_to_school', 'big_hit',
+                        'McD_leave', 'ViT_2', 'dish_qnt_reg_negative',
                         'average_price_dish_region_smooth_5', 'price_lag_new_smooth_40',
-                        'dummy_apr']
+                        'dummy_apr', 'comps_SOM']
 
         m_columns = [i[:-1] if i[-1] == '_' else i for i in matrix.columns]
 

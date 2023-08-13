@@ -11,6 +11,7 @@ warnings.filterwarnings('ignore')
 from data.load_data import load_transform_dataset
 from models.optimizer import optimize
 from utils.utils import Step2, Step4
+from utils.step5 import Step5
 from models.step3_draft import optimize_step3
 
 if __name__ == '__main__':
@@ -19,21 +20,23 @@ if __name__ == '__main__':
     df.to_csv('data/raw/total_df.csv', index=False)
 
     PATH = "data/raw/total_df.csv"
-    current_region = 'юг'
+    current_region = 'москва'
 
     df, paid_vars_imp = load_transform_dataset(PATH, current_region)
 
-    # df.to_csv('data/raw/final_df.csv')
+    df.to_csv('data/raw/final_df.csv')
 
-    # optimize(df, paid_vars_imp) # запускает оптимизатор и сохраняет результаты в папку interim
+    optimize(df, paid_vars_imp) # запускает оптимизатор и сохраняет результаты в папку interim
 
     # Шаг 2 - расчет ROI
-    # Step2(current_region, df).process_files().fit().ROI()
+    Step2(current_region, df).process_files().fit().ROI()
 
     # Шаг 3
 
-    # optimize_step3(df, paid_vars_imp) # запускает оптимизатор и сохраняет результаты в папку interim
+    optimize_step3(df, paid_vars_imp) # запускает оптимизатор и сохраняет результаты в папку interim
 
     print('Step 4 start')
     # Шаг 4
     Step4(df).process_files(df)
+
+    # Step5(df).process_data(df)

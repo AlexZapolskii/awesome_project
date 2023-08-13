@@ -48,11 +48,11 @@ def optimize(df_source: pd.DataFrame, paid_vars_imp):
     strength = np.linspace(0, 0.8, subnumbers)
     length = [2, 4, 6, 8, 10, 12]
 
-    context_vars = ['stores', 'seasonality', 'competitors_list_tv', 'new_covid',
-                    'sales_qsr',
-                    'dish_qnt_reg_negative',
+    context_vars = ['stores', 'seasonality', 'competitors_list_tv', 'new_covid', 'lockdown',
+                    'sales_qsr', 'test_mac_off', 'covid_dummy', 'back_to_school', 'big_hit',
+                    'McD_leave', 'ViT_2', 'dish_qnt_reg_negative',
                     'average_price_dish_region_smooth_5', 'price_lag_new_smooth_40',
-                    'dummy_apr']
+                    'dummy_apr', 'comps_SOM']
 
     for var in paid_vars_imp:
 

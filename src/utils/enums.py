@@ -75,11 +75,11 @@ paid_vars_spend = ["gis_spend",
                    # "nat_tv_angus_spend",
                    'digital_none_youtube_spend']
 
-context_vars = ['stores', 'seasonality', 'competitors_list_tv', 'new_covid',
-                'sales_qsr',
-                'dish_qnt_reg_negative',
-                'average_price_dish_region_smooth_5', 'price_lag_new_smooth_40',
-                'dummy_apr']
+context_vars = ['stores', 'seasonality', 'competitors_list_tv', 'new_covid', 'lockdown',
+       'sales_qsr', 'test_mac_off', 'covid_dummy', 'back_to_school', 'big_hit',
+       'McD_leave', 'ViT_2', 'dish_qnt_reg_negative',
+       'average_price_dish_region_smooth_5', 'price_lag_new_smooth_40',
+       'dummy_apr', 'comps_SOM']
 
 
 TV_Digital_OOH_Geo = ['reg_tv_imp',
